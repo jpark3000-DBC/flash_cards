@@ -10,14 +10,14 @@ class Game
     @filename = cards_file
     @question= nil
     @current_card = nil
-
+    get_csv_data
   end
 
   def get_csv_data
 
-   qa_array = IO.readlines(filename)
+   qa_array = IO.readlines(@filename)
    qa_array.select! { |l| l != "\n"}
-   qa_array.each_slice(2) do |r| 
+   qa_array.each_slice(2) do |r|
     cards << Card.new(:question => (r[0]).gsub("\n", ""), :answer => (r[1]).gsub("\n", ""))
   end
   cards
@@ -28,22 +28,29 @@ def generate_question
   cards.each do |card|
     if card.id == rand_length
       self.current_card = card
-      self.question = card.question
+      return self.question = card.question
    end
  end
 end
 
 def correct_answer?(answer)
-  self.current_card.answer == answer ? true : false
-
+  return self.current_card.answer == answer ? true : false
 end
 
-def update_card_info
-    self.current_card.solved = true
-    self.current_card.attempts +=1
+  def update_card_info
+      update_status
+      update_attempts
   end
-end
 
+  def update_status
+      self.current_card.solved = true
+  end
+
+  def update_attempts
+      self.current_card.attempts +=1
+  end
+
+end
 class Card
 
  @@card_id = 0
@@ -57,12 +64,14 @@ class Card
   @solved = false
   @id = (@@card_id+=1)
   @attempts = 0
-  
-end
 
 end
 
+end
+
+if __FILE__ == $0
 game = Game.new('flashcard_samples.txt')
 game.get_csv_data
 game.generate_question
-p game.correct_answer?("BEGIN")
+# p game.correct_answer?("BEGIN")
+end
